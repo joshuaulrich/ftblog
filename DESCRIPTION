@@ -1,0 +1,14 @@
+Package: ftblog
+Type: Package
+Title: FOSS Trading Blog
+Version: 0.0.1
+Authors@R: c(
+  person(given=c("Joshua","M."), family="Ulrich", role=c("cre","aut"), email="josh.m.ulrich@gmail.com")
+  )
+Depends: xts, zoo
+Suggests: tinytest, FRAPO, tseries, PerformanceAnalytics
+LazyLoad: yes
+Description: Code and data used in FOSS Trading blog posts.
+License: GPL (>= 2)
+URL: https://github.com/joshuaulrich/ftblog, https://blog.fosstrading.com
+BugReports: https://github.com/joshuaulrich/ftblog/issues

@@ -1,0 +1,25 @@
+
+# non-base package imports
+importFrom(stats,
+    cov,
+    lag)
+
+importFrom(utils,
+    capture.output,
+    head)
+
+# package imports
+import(xts)
+import(zoo)
+
+# exports
+export(format_pct)
+export(to_monthly_returns)
+
+# Adaptive Asset Allocation
+export(estimate_equal_risk_portf)
+export(estimate_min_var_portf)
+export(portf_top_momentum)
+export(portf_equal_risk)
+export(portf_top_momentum_equal_risk)
+export(portf_top_momentum_min_var)
