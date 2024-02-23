@@ -5,7 +5,7 @@ Version: 0.0.1
 Authors@R: c(
   person(given=c("Joshua","M."), family="Ulrich", role=c("cre","aut"), email="josh.m.ulrich@gmail.com")
   )
-Depends: xts, zoo
+Depends: R (>= 3.5.0), xts, zoo
 Suggests: tinytest, FRAPO, tseries, PerformanceAnalytics
 LazyLoad: yes
 Description: Code and data used in FOSS Trading blog posts.
