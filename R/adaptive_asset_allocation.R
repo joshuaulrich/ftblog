@@ -30,7 +30,7 @@
 #'
 #' @author Joshua Ulrich
 #'
-estimate_equal_risk_portf <-
+portf_wts_equal_risk <-
 function(returns, n_days = 60)
 {
     if (!requireNamespace("FRAPO", quietly = TRUE)) {
@@ -62,7 +62,7 @@ function(returns, n_days = 60)
 #'
 #' @author Joshua Ulrich
 #'
-portf_equal_risk <-
+portf_return_equal_risk <-
 function(returns,
          n_days = 120,
          n_days_vol = 60)
@@ -74,13 +74,15 @@ function(returns,
     # calculate portfolio weights using the prior 'n_days'
     for (i in month_end_i) {
         n_day_returns <- returns[(i - n_days):i, ]
-        weights[i,] <- estimate_equal_risk_portf(n_day_returns, n_days_vol)
+        weights[i,] <- portf_wts_equal_risk(n_day_returns, n_days_vol)
     }
 
     weights <- lag(weights)      # use prior month-end weights
     weights <- na.locf(weights)  # fill weights for all days
 
-    xts(rowSums(returns * weights), index(returns))
+    Rp <- xts(rowSums(returns * weights), index(returns))
+    colnames(Rp) <- "R_eq_risk"
+    return(Rp)
 }
 
 #' Calculate momentum-ranked equal risk portfolio returns
@@ -103,7 +105,7 @@ function(returns,
 #'
 #' @author Joshua Ulrich
 #'
-portf_top_momentum_equal_risk <-
+portf_return_momo_equal_risk <-
 function(returns,
          n_assets = 5,
          n_days = 120,
@@ -130,7 +132,7 @@ function(returns,
             # set all weights to 0, then equal-risk-weight the top 'n_assets'
             weights[i, ] <- 0
             weights[i, top_cols] <-
-                estimate_equal_risk_portf(n_day_returns[, top_cols], n_days_vol)
+                portf_wts_equal_risk(n_day_returns[, top_cols], n_days_vol)
         } else {
             # momentum must be positive and above average
             top_cols <- momentum_returns > max(0, mean(momentum_returns))
@@ -140,7 +142,7 @@ function(returns,
             if (sum(top_cols) >= 2) {
                 # need at least 2 assets to calculate non-zero weights
                 weights[i, top_cols] <-
-                    estimate_equal_risk_portf(n_day_returns[, top_cols], n_days_vol)
+                    portf_wts_equal_risk(n_day_returns[, top_cols], n_days_vol)
             }
         }
     }
@@ -148,7 +150,9 @@ function(returns,
     weights <- lag(weights)      # use prior month-end weights
     weights <- na.locf(weights)  # fill weights for all days
 
-    return(xts(rowSums(returns * weights), index(returns)))
+    Rp <- xts(rowSums(returns * weights), index(returns))
+    colnames(Rp) <- "R_momo_eq_risk"
+    return(Rp)
 }
 
 #' Calculate momentum-ranked equal weight portfolio returns
@@ -167,7 +171,7 @@ function(returns,
 #'
 #' @author Joshua Ulrich
 #'
-portf_top_momentum <-
+portf_return_momo <-
 function(returns,
          n_assets = 5,
          n_days = 120)
@@ -194,7 +198,9 @@ function(returns,
     weights <- lag(weights)      # use prior month-end weights
     weights <- na.locf(weights)  # fill weights for all days
 
-    xts(rowSums(returns * weights), index(returns))
+    Rp <- xts(rowSums(returns * weights), index(returns))
+    colnames(Rp) <- "R_momo"
+    return(Rp)
 }
 
 #' Estimate global minimum variance portfolio weights
@@ -209,7 +215,7 @@ function(returns,
 #'
 #' @author Joshua Ulrich
 #'
-estimate_min_var_portf <-
+portf_wts_min_var <-
 function(returns,
          n_days_vol = 20)
 {
@@ -253,7 +259,7 @@ function(returns,
 #'
 #' @author Joshua Ulrich
 #'
-portf_top_momentum_min_var <-
+portf_return_momo_min_var <-
 function(returns,
          n_assets = 5,
          n_days = 120,
@@ -281,7 +287,7 @@ function(returns,
             weights[i, ] <- 0
             if (length(top_cols) >= 2) {
                 weights[i, top_cols] <-
-                    estimate_min_var_portf(n_day_returns[, top_cols], n_days_vol)
+                    portf_wts_min_var(n_day_returns[, top_cols], n_days_vol)
             }
         } else {
             # momentum must be positive and above average
@@ -293,7 +299,7 @@ function(returns,
             if (sum(top_cols) >= 2) {
                 # need at least 2 assets to calculate non-zero weights
                 weights[i, top_cols] <-
-                    estimate_min_var_portf(n_day_returns[, top_cols], n_days)
+                    portf_wts_min_var(n_day_returns[, top_cols], n_days)
             }
         }
     }
@@ -302,6 +308,6 @@ function(returns,
     weights <- na.locf(weights)  # fill weights for all days
 
     Rp <- xts(rowSums(returns * weights), index(returns), weights = weights)
-    colnames(Rp) <- "returns"
+    colnames(Rp) <- "R_momo_min_var"
     return(Rp)
 }
