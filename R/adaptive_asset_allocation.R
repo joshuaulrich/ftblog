@@ -97,8 +97,8 @@ function(returns,
 #' @param n_assets Number of highest momentum assets in the portfolio.
 #' @param n_days Number of days of returns to use in the portfolio estimation.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param always_invested Can the portfolio contain assets with negative
-#'     momentum (default \code{TRUE}).
+#' @param use_abs_momo Require all assets in the portfolio to have positive
+#'     momentum in the last \code{n_days} (default \code{FALSE}).
 #'
 #' @return An xts object containing the portfolio return for each day in
 #'     \code{returns}.
@@ -110,7 +110,7 @@ function(returns,
          n_assets = 5,
          n_days = 120,
          n_days_vol = 60,
-         always_invested = TRUE)
+         use_abs_momo = FALSE)
 {
     month_end_i <- endpoints(returns, "months")       # rebalance monthly
     month_end_i <- month_end_i[month_end_i > n_days]  # skip 'n_days'
@@ -121,29 +121,21 @@ function(returns,
         # total returns for each asset class over the prior 'n_days'
         n_day_returns <- returns[(i - n_days):i, ]
         momentum_returns <- apply(1 + n_day_returns, 2, prod) - 1
+        weights[i, ] <- 0
 
-        if (always_invested) {
-            # portfolio will always be invested, even if momentum is negative
-
-            # find 'n_assets' with highest total return over previous 'n_days'
+        if (isTRUE(use_abs_momo)) {
+            # momentum must be positive
+            abs_momo_rank <- which(momentum_returns > 0)
+            top_cols <- head(abs_momo_rank, n_assets)
+        } else {
+            # relative momentum
             momentum_rank <- order(momentum_returns, decreasing = TRUE)
             top_cols <- head(momentum_rank, n_assets)
+        }
 
-            # set all weights to 0, then equal-risk-weight the top 'n_assets'
-            weights[i, ] <- 0
+        if (length(top_cols) >= 2) {
             weights[i, top_cols] <-
                 portf_wts_equal_risk(n_day_returns[, top_cols], n_days_vol)
-        } else {
-            # momentum must be positive and above average
-            top_cols <- momentum_returns > max(0, mean(momentum_returns))
-            top_cols <- momentum_returns > 0
-            weights[i, ] <- 0
-
-            if (sum(top_cols) >= 2) {
-                # need at least 2 assets to calculate non-zero weights
-                weights[i, top_cols] <-
-                    portf_wts_equal_risk(n_day_returns[, top_cols], n_days_vol)
-            }
         }
     }
 
@@ -249,10 +241,8 @@ function(returns,
 #' @param n_assets Number of highest momentum assets in the portfolio.
 #' @param n_days Number of days of returns to use in the portfolio estimation.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param use_momentum Should the portfolio contain only the \code{n_assets}
-#'     with the highest momentum (default \code{TRUE}) or all assets?
-#' @param always_invested Can the portfolio contain assets with negative
-#'     momentum (default \code{TRUE}).
+#' @param use_abs_momo Require all assets in the portfolio to have positive
+#'     momentum in the last \code{n_days} (default \code{FALSE}).
 #'
 #' @return An xts object containing the portfolio return for each day in
 #'     \code{returns}.
@@ -264,8 +254,7 @@ function(returns,
          n_assets = 5,
          n_days = 120,
          n_days_vol = 60,
-         use_momentum = TRUE,
-         always_invested = TRUE)
+         use_abs_momo = FALSE)
 {
     month_end_i <- endpoints(returns, "months")       # rebalance monthly
     month_end_i <- month_end_i[month_end_i > n_days]  # skip 'n_days'
@@ -275,32 +264,21 @@ function(returns,
     for (i in month_end_i) {
         n_day_returns <- returns[(i - n_days):i, ]
         momentum_returns <- apply(1 + n_day_returns, 2, prod) - 1
+        weights[i, ] <- 0
 
-        if (always_invested) {
-            if (use_momentum) {
-                momentum_rank <- order(momentum_returns, decreasing = TRUE)
-                top_cols <- head(momentum_rank, n_assets)
-            } else {
-                top_cols <- seq_len(ncol(returns))
-            }
-
-            weights[i, ] <- 0
-            if (length(top_cols) >= 2) {
-                weights[i, top_cols] <-
-                    portf_wts_min_var(n_day_returns[, top_cols], n_days_vol)
-            }
+        if (isTRUE(use_abs_momo)) {
+            # momentum must be positive
+            abs_momo_rank <- which(momentum_returns > 0)
+            top_cols <- head(abs_momo_rank, n_assets)
         } else {
-            # momentum must be positive and above average
-            top_cols <- momentum_returns > mean(momentum_returns)
-            top_cols <- momentum_returns > max(0, mean(momentum_returns))
-            top_cols <- momentum_returns > 0
-            weights[i, ] <- 0
+            # relative momentum
+            momentum_rank <- order(momentum_returns, decreasing = TRUE)
+            top_cols <- head(momentum_rank, n_assets)
+        }
 
-            if (sum(top_cols) >= 2) {
-                # need at least 2 assets to calculate non-zero weights
-                weights[i, top_cols] <-
-                    portf_wts_min_var(n_day_returns[, top_cols], n_days)
-            }
+        if (length(top_cols) >= 2) {
+            weights[i, top_cols] <-
+                portf_wts_min_var(n_day_returns[, top_cols], n_days_vol)
         }
     }
 

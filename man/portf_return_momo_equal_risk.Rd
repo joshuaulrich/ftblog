@@ -9,7 +9,7 @@ portf_return_momo_equal_risk(
   n_assets = 5,
   n_days = 120,
   n_days_vol = 60,
-  always_invested = TRUE
+  use_abs_momo = FALSE
 )
 }
 \arguments{
@@ -21,8 +21,8 @@ portf_return_momo_equal_risk(
 
 \item{n_days_vol}{Number of days to use in the covariance matrix calculation.}
 
-\item{always_invested}{Can the portfolio contain assets with negative
-momentum (default \code{TRUE}).}
+\item{use_abs_momo}{Require all assets in the portfolio to have positive
+momentum in the last \code{n_days} (default \code{FALSE}).}
 }
 \value{
 An xts object containing the portfolio return for each day in
