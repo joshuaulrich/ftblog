@@ -21,6 +21,9 @@
 .create_aaa_returns <-
 function(asset_table)
 {
+    getSymbols <- quantmod::getSymbols
+    Ad <- quantmod::Ad
+    Return.calculate <- PerformanceAnalytics::Return.calculate
 
     # ETF/Fund pairs
     assets <- data.frame(t(asset_table[-1, c(1, 3)]))

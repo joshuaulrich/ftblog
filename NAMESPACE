@@ -2,7 +2,8 @@
 # non-base package imports
 importFrom(stats,
     cov,
-    lag)
+    lag,
+    na.omit)
 
 importFrom(utils,
     capture.output,
