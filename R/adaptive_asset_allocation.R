@@ -289,3 +289,92 @@ function(returns,
     colnames(Rp) <- "R_momo_min_var"
     return(Rp)
 }
+
+#' Estimate efficient portfolio weights
+#'
+#' This function uses \code{tseries::portfolio.optim} to estimate the
+#' mean-variance efficient portfolio weights.
+#'
+#' @param returns An xts object containing returns for two or more assets.
+#' @param n_days_vol Number of days to use in the covariance matrix calculation.
+#'
+#' @return An xts object containing weights for each asset in \code{returns}.
+#'
+#' @author Joshua Ulrich
+#'
+portf_wts_efficient <-
+function(returns,
+         n_days_vol = 20)
+{
+    # the covariance matrix is the correlation using all returns, but
+    # the volatility of the past 'n_days_vol'
+    vol_returns <- last(returns, n_days_vol)
+    sigma <- cov(vol_returns)
+
+    Ra <- as.matrix(returns)
+    min_var_portf <- tseries::portfolio.optim(x = Ra, covmat = sigma)
+    weights <- round(min_var_portf$pw, 7)
+
+    return(weights)
+}
+
+#' Calculate momentum-ranked efficient portfolio returns
+#'
+#' This function calculates the returns for the mean-variance efficient
+#' portfolio using the \code{n_assets} with the highest momentum over the last
+#' \code{n_days}.
+#' Then those weights are used to calculate the portfolio returns for the
+#' following month.
+#'
+#' @param returns An xts object containing returns for two or more assets.
+#' @param n_assets Number of highest momentum assets in the portfolio.
+#' @param n_days Number of days of returns to use in the portfolio estimation.
+#' @param n_days_vol Number of days to use in the covariance matrix calculation.
+#' @param use_abs_momo Require all assets in the portfolio to have positive
+#'     momentum in the last \code{n_days} (default \code{FALSE}).
+#'
+#' @return An xts object containing the portfolio return for each day in
+#'     \code{returns}.
+#'
+#' @author Joshua Ulrich
+#'
+portf_return_momo_efficient <-
+function(returns,
+         n_assets = 5,
+         n_days = 120,
+         n_days_vol = 60,
+         use_abs_momo = FALSE)
+{
+    month_end_i <- endpoints(returns, "months")       # rebalance monthly
+    month_end_i <- month_end_i[month_end_i > n_days]  # skip 'n_days'
+    weights <- returns * NA                           # pre-allocate
+
+    # calculate portfolio components and weights using the prior 'n_days'
+    for (i in month_end_i) {
+        n_day_returns <- returns[(i - n_days):i, ]
+        momentum_returns <- apply(1 + n_day_returns, 2, prod) - 1
+        weights[i, ] <- 0
+
+        if (isTRUE(use_abs_momo)) {
+            # momentum must be positive
+            abs_momo_rank <- which(momentum_returns > 0)
+            top_cols <- head(abs_momo_rank, n_assets)
+        } else {
+            # relative momentum
+            momentum_rank <- order(momentum_returns, decreasing = TRUE)
+            top_cols <- head(momentum_rank, n_assets)
+        }
+
+        if (length(top_cols) >= 2) {
+            weights[i, top_cols] <-
+                portf_wts_efficient(n_day_returns[, top_cols], n_days_vol)
+        }
+    }
+
+    weights <- lag(weights)      # use prior month-end weights
+    weights <- na.locf(weights)  # fill weights for all days
+
+    Rp <- xts(rowSums(returns * weights), index(returns), weights = weights)
+    colnames(Rp) <- "R_momo_efficient"
+    return(Rp)
+}

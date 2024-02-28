@@ -18,9 +18,11 @@ export(format_pct)
 export(to_monthly_returns)
 
 # Adaptive Asset Allocation
+export(portf_wts_efficient)
 export(portf_wts_equal_risk)
 export(portf_wts_min_var)
 export(portf_return_momo)
 export(portf_return_equal_risk)
+export(portf_return_momo_efficient)
 export(portf_return_momo_equal_risk)
 export(portf_return_momo_min_var)
