@@ -9,7 +9,7 @@ portf_return_momo_equal_risk(
   n_assets = 5,
   n_days = 120,
   n_days_vol = 60,
-  use_abs_momo = FALSE
+  momo_type = c("relative", "positive", "above average")
 )
 }
 \arguments{
@@ -21,8 +21,12 @@ portf_return_momo_equal_risk(
 
 \item{n_days_vol}{Number of days to use in the covariance matrix calculation.}
 
-\item{use_abs_momo}{Require all assets in the portfolio to have positive
-momentum in the last \code{n_days} (default \code{FALSE}).}
+\item{momo_type}{Type of momentum to use. Can be one of the following:
+* relative: use the top \code{n_assets} with the highest momentum.
+* positive: use the top \code{n_assets} with the highest *positive*
+  momentum. Assets with negative momentum are excluded.
+* above average: use the top \code{n_assets} with the highest above-average
+  momentum. Assets with below average momentum are excluded.}
 }
 \value{
 An xts object containing the portfolio return for each day in

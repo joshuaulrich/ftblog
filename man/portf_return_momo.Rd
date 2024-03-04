@@ -4,7 +4,12 @@
 \alias{portf_return_momo}
 \title{Calculate momentum-ranked equal weight portfolio returns}
 \usage{
-portf_return_momo(returns, n_assets = 5, n_days = 120)
+portf_return_momo(
+  returns,
+  n_assets = 5,
+  n_days = 120,
+  momo_type = c("relative", "positive", "above average")
+)
 }
 \arguments{
 \item{returns}{An xts object containing returns for two or more assets.}
@@ -12,6 +17,13 @@ portf_return_momo(returns, n_assets = 5, n_days = 120)
 \item{n_assets}{Number of highest momentum assets in the portfolio.}
 
 \item{n_days}{Number of days of returns to use in the portfolio estimation.}
+
+\item{momo_type}{Type of momentum to use. Can be one of the following:
+* relative: use the top \code{n_assets} with the highest momentum.
+* positive: use the top \code{n_assets} with the highest *positive*
+  momentum. Assets with negative momentum are excluded.
+* above average: use the top \code{n_assets} with the highest above-average
+  momentum. Assets with below average momentum are excluded.}
 }
 \value{
 An xts object containing the portfolio return for each day in

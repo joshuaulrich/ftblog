@@ -97,8 +97,12 @@ function(returns,
 #' @param n_assets Number of highest momentum assets in the portfolio.
 #' @param n_days Number of days of returns to use in the portfolio estimation.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param use_abs_momo Require all assets in the portfolio to have positive
-#'     momentum in the last \code{n_days} (default \code{FALSE}).
+#' @param momo_type Type of momentum to use. Can be one of the following:
+#'   * relative: use the top \code{n_assets} with the highest momentum.
+#'   * positive: use the top \code{n_assets} with the highest *positive*
+#'     momentum. Assets with negative momentum are excluded.
+#'   * above average: use the top \code{n_assets} with the highest above-average
+#'     momentum. Assets with below average momentum are excluded.
 #'
 #' @return An xts object containing the portfolio return for each day in
 #'     \code{returns}.
@@ -110,11 +114,12 @@ function(returns,
          n_assets = 5,
          n_days = 120,
          n_days_vol = 60,
-         use_abs_momo = FALSE)
+         momo_type = c("relative", "positive", "above average"))
 {
     month_end_i <- endpoints(returns, "months")       # rebalance monthly
     month_end_i <- month_end_i[month_end_i > n_days]  # skip 'n_days'
     weights <- returns * NA                           # pre-allocate
+    momo_type <- match.arg(momo_type)
 
     # calculate portfolio components and weights using the prior 'n_days'
     for (i in month_end_i) {
@@ -123,15 +128,7 @@ function(returns,
         momentum_returns <- apply(1 + n_day_returns, 2, prod) - 1
         weights[i, ] <- 0
 
-        if (isTRUE(use_abs_momo)) {
-            # momentum must be positive
-            abs_momo_rank <- which(momentum_returns > 0)
-            top_cols <- head(abs_momo_rank, n_assets)
-        } else {
-            # relative momentum
-            momentum_rank <- order(momentum_returns, decreasing = TRUE)
-            top_cols <- head(momentum_rank, n_assets)
-        }
+        top_cols <- .find_top_momo_columns(momentum_returns, n_assets, momo_type)
 
         if (length(top_cols) >= 2) {
             weights[i, top_cols] <-
@@ -157,6 +154,12 @@ function(returns,
 #' @param returns An xts object containing returns for two or more assets.
 #' @param n_assets Number of highest momentum assets in the portfolio.
 #' @param n_days Number of days of returns to use in the portfolio estimation.
+#' @param momo_type Type of momentum to use. Can be one of the following:
+#'   * relative: use the top \code{n_assets} with the highest momentum.
+#'   * positive: use the top \code{n_assets} with the highest *positive*
+#'     momentum. Assets with negative momentum are excluded.
+#'   * above average: use the top \code{n_assets} with the highest above-average
+#'     momentum. Assets with below average momentum are excluded.
 #'
 #' @return An xts object containing the portfolio return for each day in
 #'     \code{returns}.
@@ -166,11 +169,13 @@ function(returns,
 portf_return_momo <-
 function(returns,
          n_assets = 5,
-         n_days = 120)
+         n_days = 120,
+         momo_type = c("relative", "positive", "above average"))
 {
     month_end_i <- endpoints(returns, "months")       # rebalance monthly
     month_end_i <- month_end_i[month_end_i > n_days]  # skip 'n_days'
     weights <- returns * NA                           # pre-allocate
+    momo_type <- match.arg(momo_type)
 
     # calculate portfolio components and weights using the prior 'n_days'
     for (i in month_end_i) {
@@ -178,13 +183,11 @@ function(returns,
         n_day_returns <- returns[(i - n_days):i, ]
         momentum_returns <- apply(1 + n_day_returns, 2, prod) - 1
 
-        # find 'n_assets' with highest total return over previous 'n_days'
-        momentum_rank <- order(momentum_returns, decreasing = TRUE)
-        top_n_loc <- head(momentum_rank, n_assets)
+        top_cols <- .find_top_momo_columns(momentum_returns, n_assets, momo_type)
 
         # set all weights to 0, then equal-risk-weight the top 'n_assets'
         weights[i, ] <- 0
-        weights[i, top_n_loc] <- 1 / n_assets
+        weights[i, top_cols] <- 1 / n_assets
     }
 
     weights <- lag(weights)      # use prior month-end weights
@@ -235,8 +238,12 @@ function(returns,
 #' @param n_assets Number of highest momentum assets in the portfolio.
 #' @param n_days Number of days of returns to use in the portfolio estimation.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param use_abs_momo Require all assets in the portfolio to have positive
-#'     momentum in the last \code{n_days} (default \code{FALSE}).
+#' @param momo_type Type of momentum to use. Can be one of the following:
+#'   * relative: use the top \code{n_assets} with the highest momentum.
+#'   * positive: use the top \code{n_assets} with the highest *positive*
+#'     momentum. Assets with negative momentum are excluded.
+#'   * above average: use the top \code{n_assets} with the highest above-average
+#'     momentum. Assets with below average momentum are excluded.
 #'
 #' @return An xts object containing the portfolio return for each day in
 #'     \code{returns}.
@@ -248,11 +255,12 @@ function(returns,
          n_assets = 5,
          n_days = 120,
          n_days_vol = 60,
-         use_abs_momo = FALSE)
+         momo_type = c("relative", "positive", "above average"))
 {
     month_end_i <- endpoints(returns, "months")       # rebalance monthly
     month_end_i <- month_end_i[month_end_i > n_days]  # skip 'n_days'
     weights <- returns * NA                           # pre-allocate
+    momo_type <- match.arg(momo_type)
 
     # calculate portfolio components and weights using the prior 'n_days'
     for (i in month_end_i) {
@@ -260,15 +268,7 @@ function(returns,
         momentum_returns <- apply(1 + n_day_returns, 2, prod) - 1
         weights[i, ] <- 0
 
-        if (isTRUE(use_abs_momo)) {
-            # momentum must be positive
-            abs_momo_rank <- which(momentum_returns > 0)
-            top_cols <- head(abs_momo_rank, n_assets)
-        } else {
-            # relative momentum
-            momentum_rank <- order(momentum_returns, decreasing = TRUE)
-            top_cols <- head(momentum_rank, n_assets)
-        }
+        top_cols <- .find_top_momo_columns(momentum_returns, n_assets, momo_type)
 
         if (length(top_cols) >= 2) {
             weights[i, top_cols] <-
@@ -324,8 +324,12 @@ function(returns,
 #' @param n_assets Number of highest momentum assets in the portfolio.
 #' @param n_days Number of days of returns to use in the portfolio estimation.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param use_abs_momo Require all assets in the portfolio to have positive
-#'     momentum in the last \code{n_days} (default \code{FALSE}).
+#' @param momo_type Type of momentum to use. Can be one of the following:
+#'   * relative: use the top \code{n_assets} with the highest momentum.
+#'   * positive: use the top \code{n_assets} with the highest *positive*
+#'     momentum. Assets with negative momentum are excluded.
+#'   * above average: use the top \code{n_assets} with the highest above-average
+#'     momentum. Assets with below average momentum are excluded.
 #'
 #' @return An xts object containing the portfolio return for each day in
 #'     \code{returns}.
@@ -337,11 +341,12 @@ function(returns,
          n_assets = 5,
          n_days = 120,
          n_days_vol = 60,
-         use_abs_momo = FALSE)
+         momo_type = c("relative", "positive", "above average"))
 {
     month_end_i <- endpoints(returns, "months")       # rebalance monthly
     month_end_i <- month_end_i[month_end_i > n_days]  # skip 'n_days'
     weights <- returns * NA                           # pre-allocate
+    momo_type <- match.arg(momo_type)
 
     # calculate portfolio components and weights using the prior 'n_days'
     for (i in month_end_i) {
@@ -349,15 +354,7 @@ function(returns,
         momentum_returns <- apply(1 + n_day_returns, 2, prod) - 1
         weights[i, ] <- 0
 
-        if (isTRUE(use_abs_momo)) {
-            # momentum must be positive
-            abs_momo_rank <- which(momentum_returns > 0)
-            top_cols <- head(abs_momo_rank, n_assets)
-        } else {
-            # relative momentum
-            momentum_rank <- order(momentum_returns, decreasing = TRUE)
-            top_cols <- head(momentum_rank, n_assets)
-        }
+        top_cols <- .find_top_momo_columns(momentum_returns, n_assets, momo_type)
 
         if (length(top_cols) >= 2) {
             weights[i, top_cols] <-
@@ -371,4 +368,33 @@ function(returns,
     Rp <- xts(rowSums(returns * weights), index(returns), weights = weights)
     colnames(Rp) <- "R_momo_efficient"
     return(Rp)
+}
+
+.find_top_momo_columns <-
+function(returns,
+         n_assets = 5,
+         type = c("relative", "positive", "above average"))
+{
+    type <- match.arg(type)
+
+    include_cols <- switch(type,
+        "relative"      = rep(TRUE, length(returns)),
+        "positive"      = returns > 0,
+        "above average" = returns > mean(returns, na.rm = TRUE))
+
+    which_cols <- which(include_cols)
+
+    if (length(which_cols) > 0) {
+        # at least 1 column meets the 'type' criteria
+        # rank returns from highest to lowest
+        momo_rank <- order(returns, decreasing = TRUE)
+        # which columns have the highest rank and meet the 'type' criteria?
+        top_cols <- momo_rank[momo_rank %in% which_cols]
+        # keep the top 'n_assets'
+        top_cols <- head(top_cols, n_assets)
+    } else {
+        top_cols <- integer()
+    }
+
+    return(top_cols)
 }
