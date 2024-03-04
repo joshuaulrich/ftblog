@@ -219,14 +219,8 @@ function(returns,
     capture.output({  # this optimization function is chatty
         min_var_portf <- FRAPO::PGMV(sigma, percentage = FALSE)
     })
+
     return(FRAPO::Weights(min_var_portf))
-
-    Ra <- as.matrix(returns)
-    max_pct <- rep(1, ncol(Ra))
-    min_var_portf <- tseries::portfolio.optim(x = Ra, covmat = sigma, reshigh = max_pct)
-    weights <- round(min_var_portf$pw, 7)
-
-    return(weights)
 }
 
 #' Calculate momentum-ranked minimum variance portfolio returns
