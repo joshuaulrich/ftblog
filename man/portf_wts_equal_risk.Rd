@@ -4,12 +4,12 @@
 \alias{portf_wts_equal_risk}
 \title{Estimate equal risk portfolio weights}
 \usage{
-portf_wts_equal_risk(returns, n_days = 60)
+portf_wts_equal_risk(returns, n_days_vol = 60)
 }
 \arguments{
 \item{returns}{An xts object containing returns for two or more assets.}
 
-\item{n_days}{Number of days to use in the covariance matrix calculation.}
+\item{n_days_vol}{Number of days to use in the covariance matrix calculation.}
 }
 \value{
 An xts object containing weights for each asset in \code{returns}.

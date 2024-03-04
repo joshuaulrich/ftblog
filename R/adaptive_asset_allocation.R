@@ -24,19 +24,19 @@
 #' Contribution portfolio weights.
 #'
 #' @param returns An xts object containing returns for two or more assets.
-#' @param n_days Number of days to use in the covariance matrix calculation.
+#' @param n_days_vol Number of days to use in the covariance matrix calculation.
 #'
 #' @return An xts object containing weights for each asset in \code{returns}.
 #'
 #' @author Joshua Ulrich
 #'
 portf_wts_equal_risk <-
-function(returns, n_days = 60)
+function(returns, n_days_vol = 60)
 {
     if (!requireNamespace("FRAPO", quietly = TRUE)) {
         stop("please install the FRAPO package")
     }
-    n_day_returns <- last(returns, n_days)
+    n_day_returns <- last(returns, n_days_vol)
     sigma <- cov(n_day_returns)
 
     capture.output({  # this optimization function is chatty
