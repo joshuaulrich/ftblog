@@ -18,10 +18,26 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-#' Estimate equal risk portfolio weights
+#' Estimate portfolio weights
 #'
-#' This function uses \code{FRAPO::PERC()} to estimate the Equal Risk
-#' Contribution portfolio weights.
+#' These functions estimate weights for various portfolio specifications.
+#'
+#' \describe{
+#'    \item{\code{portf_wts_efficient}}{uses \code{\link[tseries]{portfolio.optim}}
+#'        from the \pkg{tseries} package to estimate the mean-variance efficient
+#'        portfolio weights.
+#'    }
+#'    \item{\code{portf_wts_min_var}}{uses \code{\link[FRAPO]{PGMV}} from the
+#'        \pkg{FRAPO} package to estimate the Global Minimum Variance portfolio
+#'        weights.
+#'    }
+#'    \item{\code{portf_wts_equal_risk}}{uses \code{\link[FRAPO]{PERC}} from the
+#'        \pkg{FRAPO} package to estimate the Equal Risk Contribution portfolio
+#'        weights.
+#'    }
+#' }
+#'
+#' See the documentation for those respective for details.
 #'
 #' @param returns An xts object containing returns for two or more assets.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
@@ -30,8 +46,49 @@
 #'
 #' @author Joshua Ulrich
 #'
+#' @rdname portfolio_weights
+#'
+portf_wts_efficient <-
+function(returns,
+         n_days_vol = 20)
+{
+    if (!requireNamespace("tseries", quietly = TRUE)) {
+        stop("please install the tseries package")
+    }
+    # the covariance matrix is the correlation using all returns, but
+    # the volatility of the past 'n_days_vol'
+    vol_returns <- last(returns, n_days_vol)
+    sigma <- cov(vol_returns)
+
+    Ra <- as.matrix(returns)
+    min_var_portf <- tseries::portfolio.optim(x = Ra, covmat = sigma)
+    weights <- round(min_var_portf$pw, 7)
+
+    return(weights)
+}
+
+#' @rdname portfolio_weights
+portf_wts_min_var <-
+function(returns,
+         n_days_vol = 20)
+{
+    if (!requireNamespace("FRAPO", quietly = TRUE)) {
+        stop("please install the FRAPO package")
+    }
+    vol_returns <- last(returns, n_days_vol)
+    sigma <- cov(vol_returns)
+
+    capture.output({  # this optimization function is chatty
+        min_var_portf <- FRAPO::PGMV(sigma, percentage = FALSE)
+    })
+
+    return(FRAPO::Weights(min_var_portf))
+}
+
+#' @rdname portfolio_weights
 portf_wts_equal_risk <-
-function(returns, n_days_vol = 60)
+function(returns,
+         n_days_vol = 60)
 {
     if (!requireNamespace("FRAPO", quietly = TRUE)) {
         stop("please install the FRAPO package")
@@ -198,34 +255,6 @@ function(returns,
     return(Rp)
 }
 
-#' Estimate global minimum variance portfolio weights
-#'
-#' This function uses \code{FRAPO::PGMV()} to estimate the Global Minimum
-#' Variance portfolio weights.
-#'
-#' @param returns An xts object containing returns for two or more assets.
-#' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#'
-#' @return An xts object containing weights for each asset in \code{returns}.
-#'
-#' @author Joshua Ulrich
-#'
-portf_wts_min_var <-
-function(returns,
-         n_days_vol = 20)
-{
-    # the covariance matrix is the correlation using all returns, but
-    # the volatility of the past 'n_days_vol'
-    vol_returns <- last(returns, n_days_vol)
-    sigma <- cov(vol_returns)
-
-    capture.output({  # this optimization function is chatty
-        min_var_portf <- FRAPO::PGMV(sigma, percentage = FALSE)
-    })
-
-    return(FRAPO::Weights(min_var_portf))
-}
-
 #' Calculate momentum-ranked minimum variance portfolio returns
 #'
 #' This function calculates the returns for the global minimum variance
@@ -284,33 +313,6 @@ function(returns,
     return(Rp)
 }
 
-#' Estimate efficient portfolio weights
-#'
-#' This function uses \code{tseries::portfolio.optim} to estimate the
-#' mean-variance efficient portfolio weights.
-#'
-#' @param returns An xts object containing returns for two or more assets.
-#' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#'
-#' @return An xts object containing weights for each asset in \code{returns}.
-#'
-#' @author Joshua Ulrich
-#'
-portf_wts_efficient <-
-function(returns,
-         n_days_vol = 20)
-{
-    # the covariance matrix is the correlation using all returns, but
-    # the volatility of the past 'n_days_vol'
-    vol_returns <- last(returns, n_days_vol)
-    sigma <- cov(vol_returns)
-
-    Ra <- as.matrix(returns)
-    min_var_portf <- tseries::portfolio.optim(x = Ra, covmat = sigma)
-    weights <- round(min_var_portf$pw, 7)
-
-    return(weights)
-}
 
 #' Calculate momentum-ranked efficient portfolio returns
 #'
