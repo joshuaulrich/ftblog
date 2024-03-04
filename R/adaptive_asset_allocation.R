@@ -103,21 +103,65 @@ function(returns,
     return(FRAPO::Weights(optim_portf))
 }
 
-#' Calculate equal risk portfolio returns
+#' Calculate portfolio returns
 #'
-#' This function calculates the portfolio weights at the end of each month
-#' using estimated portfolio risk from the returns over the last 60 days.
-#' Then those weights are used to calculate the portfolio returns for the
-#' following month.
+#' These functions calculate returns for various portfolio specifications. They
+#' calculate portfolio weights at the end of each month and apply those weights
+#' to the following month.
+#'
+#' These function use \code{n_days} of returns to estimate the asset weights,
+#' and \code{n_days_vol} to calculate the covariance matrix. Functions with a
+#' \code{n_assets} argument will only include up to that number of assets in
+#' the portfolio.
+#'
+#' \describe{
+#'   \item{\code{portf_return_equal_risk}}{uses \code{\link[FRAPO]{PERC}} from the
+#'     \pkg{FRAPO} package to calculate the Equal Risk Contribution portfolio
+#'     return using all assets.
+#'   }
+#'   \item{\code{portf_return_momo}}{calculates the equal weight portfolio of
+#'     the \code{n_assets} with the highest momentum over the past \code{n_days}.
+#'   }
+#'   \item{\code{portf_return_momo_equal_risk}}{calculates the Equal Risk
+#'     Contribution portfolio return using only the \code{n_assets} with the
+#'     highest momentum over the last \code{n_days}.
+#'   }
+#'   \item{\code{portf_return_momo_efficient}}{uses \code{\link[tseries]{portfolio.optim}}
+#'     from the \pkg{tseries} package to calculate the mean-variance efficient
+#'     portfolio return using the \code{n_assets} with the highest momentum over
+#'     the last \code{n_days}.
+#'   }
+#'   \item{\code{portf_return_momo_min_var}}{uses \code{\link[FRAPO]{PGMV}} from
+#'     the \pkg{FRAPO} package to calculate the Global Minimum Variance portfolio
+#'     return using the \code{n_assets} with the highest momentum over the last
+#'     \code{n_days}.
+#'   }
+#' }
+#'
+#' The \code{momo_type} argument can be one of the following values:
+#' \describe{
+#'   \item{relative}{use the top \code{n_assets} with the highest momentum.
+#'   }
+#'   \item{positive}{use the top \code{n_assets} with the highest \emph{positive}
+#'     momentum. Assets with negative momentum are excluded.
+#'   }
+#'   \item{above average}{use the top \code{n_assets} with the highest above-average
+#'     momentum. Assets with below average momentum are excluded.
+#'   }
+#' }
 #'
 #' @param returns An xts object containing returns for two or more assets.
+#' @param n_assets Number of highest momentum assets in the portfolio.
 #' @param n_days Number of days of returns to use in the portfolio estimation.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
+#' @param momo_type Type of momentum to use. See Details.
 #'
 #' @return An xts object containing the portfolio return for each day in
 #'     \code{returns}.
 #'
 #' @author Joshua Ulrich
+#'
+#' @rdname portfolio_returns
 #'
 portf_return_equal_risk <-
 function(returns,
@@ -142,30 +186,7 @@ function(returns,
     return(Rp)
 }
 
-#' Calculate momentum-ranked equal risk portfolio returns
-#'
-#' This function calculates the portfolio returns for a momentum-ranked subset
-#' of the assets in \code{returns}. It determines weights at the end of each
-#' month using estimated portfolio risk from the returns of the \code{n_assets}
-#' with the highest momentum over the last \code{n_days}. Then those weights
-#' are used to calculate the portfolio returns for the following month.
-#'
-#' @param returns An xts object containing returns for two or more assets.
-#' @param n_assets Number of highest momentum assets in the portfolio.
-#' @param n_days Number of days of returns to use in the portfolio estimation.
-#' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param momo_type Type of momentum to use. Can be one of the following:
-#'   * relative: use the top \code{n_assets} with the highest momentum.
-#'   * positive: use the top \code{n_assets} with the highest *positive*
-#'     momentum. Assets with negative momentum are excluded.
-#'   * above average: use the top \code{n_assets} with the highest above-average
-#'     momentum. Assets with below average momentum are excluded.
-#'
-#' @return An xts object containing the portfolio return for each day in
-#'     \code{returns}.
-#'
-#' @author Joshua Ulrich
-#'
+#' @rdname portfolio_returns
 portf_return_momo_equal_risk <-
 function(returns,
          n_assets = 5,
@@ -201,28 +222,7 @@ function(returns,
     return(Rp)
 }
 
-#' Calculate momentum-ranked equal weight portfolio returns
-#'
-#' This function calculates the returns of an equal-weight portfolio of the
-#' \code{n_assets} with the highest momentum over the last \code{n_days}.
-#' Then those weights are used to calculate the portfolio returns for the
-#' following month.
-#'
-#' @param returns An xts object containing returns for two or more assets.
-#' @param n_assets Number of highest momentum assets in the portfolio.
-#' @param n_days Number of days of returns to use in the portfolio estimation.
-#' @param momo_type Type of momentum to use. Can be one of the following:
-#'   * relative: use the top \code{n_assets} with the highest momentum.
-#'   * positive: use the top \code{n_assets} with the highest *positive*
-#'     momentum. Assets with negative momentum are excluded.
-#'   * above average: use the top \code{n_assets} with the highest above-average
-#'     momentum. Assets with below average momentum are excluded.
-#'
-#' @return An xts object containing the portfolio return for each day in
-#'     \code{returns}.
-#'
-#' @author Joshua Ulrich
-#'
+#' @rdname portfolio_returns
 portf_return_momo <-
 function(returns,
          n_assets = 5,
@@ -255,30 +255,7 @@ function(returns,
     return(Rp)
 }
 
-#' Calculate momentum-ranked minimum variance portfolio returns
-#'
-#' This function calculates the returns for the global minimum variance
-#' portfolio using the \code{n_assets} with the highest momentum over the last
-#' \code{n_days}.
-#' Then those weights are used to calculate the portfolio returns for the
-#' following month.
-#'
-#' @param returns An xts object containing returns for two or more assets.
-#' @param n_assets Number of highest momentum assets in the portfolio.
-#' @param n_days Number of days of returns to use in the portfolio estimation.
-#' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param momo_type Type of momentum to use. Can be one of the following:
-#'   * relative: use the top \code{n_assets} with the highest momentum.
-#'   * positive: use the top \code{n_assets} with the highest *positive*
-#'     momentum. Assets with negative momentum are excluded.
-#'   * above average: use the top \code{n_assets} with the highest above-average
-#'     momentum. Assets with below average momentum are excluded.
-#'
-#' @return An xts object containing the portfolio return for each day in
-#'     \code{returns}.
-#'
-#' @author Joshua Ulrich
-#'
+#' @rdname portfolio_returns
 portf_return_momo_min_var <-
 function(returns,
          n_assets = 5,
@@ -313,31 +290,7 @@ function(returns,
     return(Rp)
 }
 
-
-#' Calculate momentum-ranked efficient portfolio returns
-#'
-#' This function calculates the returns for the mean-variance efficient
-#' portfolio using the \code{n_assets} with the highest momentum over the last
-#' \code{n_days}.
-#' Then those weights are used to calculate the portfolio returns for the
-#' following month.
-#'
-#' @param returns An xts object containing returns for two or more assets.
-#' @param n_assets Number of highest momentum assets in the portfolio.
-#' @param n_days Number of days of returns to use in the portfolio estimation.
-#' @param n_days_vol Number of days to use in the covariance matrix calculation.
-#' @param momo_type Type of momentum to use. Can be one of the following:
-#'   * relative: use the top \code{n_assets} with the highest momentum.
-#'   * positive: use the top \code{n_assets} with the highest *positive*
-#'     momentum. Assets with negative momentum are excluded.
-#'   * above average: use the top \code{n_assets} with the highest above-average
-#'     momentum. Assets with below average momentum are excluded.
-#'
-#' @return An xts object containing the portfolio return for each day in
-#'     \code{returns}.
-#'
-#' @author Joshua Ulrich
-#'
+#' @rdname portfolio_returns
 portf_return_momo_efficient <-
 function(returns,
          n_assets = 5,
