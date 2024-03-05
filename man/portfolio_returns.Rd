@@ -54,7 +54,7 @@ portf_return_momo_efficient(
 }
 \value{
 An xts object containing the portfolio return for each day in
-    \code{returns}.
+\code{returns}.
 }
 \description{
 These functions calculate returns for various portfolio specifications. They
@@ -68,39 +68,36 @@ and \code{n_days_vol} to calculate the covariance matrix. Functions with a
 the portfolio.
 
 \describe{
-  \item{\code{portf_return_equal_risk}}{uses \code{\link[FRAPO]{PERC}} from the
-    \pkg{FRAPO} package to calculate the Equal Risk Contribution portfolio
-    return using all assets.
-  }
-  \item{\code{portf_return_momo}}{calculates the equal weight portfolio of
-    the \code{n_assets} with the highest momentum over the past \code{n_days}.
-  }
-  \item{\code{portf_return_momo_equal_risk}}{calculates the Equal Risk
-    Contribution portfolio return using only the \code{n_assets} with the
-    highest momentum over the last \code{n_days}.
-  }
-  \item{\code{portf_return_momo_efficient}}{uses \code{\link[tseries]{portfolio.optim}}
-    from the \pkg{tseries} package to calculate the mean-variance efficient
-    portfolio return using the \code{n_assets} with the highest momentum over
-    the last \code{n_days}.
-  }
-  \item{\code{portf_return_momo_min_var}}{uses \code{\link[FRAPO]{PGMV}} from
-    the \pkg{FRAPO} package to calculate the Global Minimum Variance portfolio
-    return using the \code{n_assets} with the highest momentum over the last
-    \code{n_days}.
-  }
+\item{\code{portf_return_equal_risk}}{uses \code{\link[FRAPO:PERC]{FRAPO::PERC()}} to calculate
+the Equal Risk Contribution portfolio return using all assets.
+}
+\item{\code{portf_return_momo}}{calculates the equal weight portfolio of
+the \code{n_assets} with the highest momentum over the past \code{n_days}.
+}
+\item{\code{portf_return_momo_equal_risk}}{calculates the Equal Risk
+Contribution portfolio return using only the \code{n_assets} with the
+highest momentum over the last \code{n_days}.
+}
+\item{\code{portf_return_momo_efficient}}{uses \code{\link[tseries:portfolio.optim]{tseries::portfolio.optim()}}
+to calculate the mean-variance efficient portfolio return using the
+\code{n_assets} with the highest momentum over the last \code{n_days}.
+}
+\item{\code{portf_return_momo_min_var}}{uses \code{\link[FRAPO:PGMV]{FRAPO::PGMV()}} to calculate
+to calculate the Global Minimum Variance portfolio return using the
+\code{n_assets} with the highest momentum over the last \code{n_days}.
+}
 }
 
 The \code{momo_type} argument can be one of the following values:
 \describe{
-  \item{relative}{use the top \code{n_assets} with the highest momentum.
-  }
-  \item{positive}{use the top \code{n_assets} with the highest \emph{positive}
-    momentum. Assets with negative momentum are excluded.
-  }
-  \item{above average}{use the top \code{n_assets} with the highest above-average
-    momentum. Assets with below average momentum are excluded.
-  }
+\item{relative}{use the top \code{n_assets} with the highest momentum.
+}
+\item{positive}{use the top \code{n_assets} with the highest \emph{positive}
+momentum. Assets with negative momentum are excluded.
+}
+\item{above average}{use the top \code{n_assets} with the highest above-average
+momentum. Assets with below average momentum are excluded.
+}
 }
 }
 \author{

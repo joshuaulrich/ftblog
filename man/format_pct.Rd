@@ -12,7 +12,7 @@ format_pct(x, digits = 1)
 \item{digits}{Number of decimal digits}
 }
 \value{
-A character string ending in "%"
+A character string ending in "\%"
 }
 \description{
 This function formats its input as a percentage.

@@ -25,21 +25,19 @@ These functions estimate weights for various portfolio specifications.
 }
 \details{
 \describe{
-   \item{\code{portf_wts_efficient}}{uses \code{\link[tseries]{portfolio.optim}}
-       from the \pkg{tseries} package to estimate the mean-variance efficient
-       portfolio weights.
-   }
-   \item{\code{portf_wts_min_var}}{uses \code{\link[FRAPO]{PGMV}} from the
-       \pkg{FRAPO} package to estimate the Global Minimum Variance portfolio
-       weights.
-   }
-   \item{\code{portf_wts_equal_risk}}{uses \code{\link[FRAPO]{PERC}} from the
-       \pkg{FRAPO} package to estimate the Equal Risk Contribution portfolio
-       weights.
-   }
+\item{\code{portf_wts_efficient}}{estimates the mean-variance efficient
+portfolio weights using \code{\link[tseries:portfolio.optim]{tseries::portfolio.optim()}}.
+}
+\item{\code{portf_wts_min_var}}{estimates the Global Minimum Variance portfolio
+weights using \code{\link[FRAPO:PGMV]{FRAPO::PGMV()}}.
+}
+\item{\code{portf_wts_equal_risk}}{estimates the Equal Risk Contribution
+portfolio weights using \code{\link[FRAPO:PERC]{FRAPO::PERC()}}.
+}
 }
 
-See the documentation for those respective for details.
+See the documentation for each portfolio weight estimation function for
+details on how they work.
 }
 \author{
 Joshua Ulrich

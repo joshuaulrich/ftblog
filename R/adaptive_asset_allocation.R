@@ -23,26 +23,24 @@
 #' These functions estimate weights for various portfolio specifications.
 #'
 #' \describe{
-#'    \item{\code{portf_wts_efficient}}{uses \code{\link[tseries]{portfolio.optim}}
-#'        from the \pkg{tseries} package to estimate the mean-variance efficient
-#'        portfolio weights.
-#'    }
-#'    \item{\code{portf_wts_min_var}}{uses \code{\link[FRAPO]{PGMV}} from the
-#'        \pkg{FRAPO} package to estimate the Global Minimum Variance portfolio
-#'        weights.
-#'    }
-#'    \item{\code{portf_wts_equal_risk}}{uses \code{\link[FRAPO]{PERC}} from the
-#'        \pkg{FRAPO} package to estimate the Equal Risk Contribution portfolio
-#'        weights.
-#'    }
+#'   \item{`portf_wts_efficient`}{estimates the mean-variance efficient
+#'     portfolio weights using [tseries::portfolio.optim()].
+#'   }
+#'   \item{`portf_wts_min_var`}{estimates the Global Minimum Variance portfolio
+#'     weights using [FRAPO::PGMV()].
+#'   }
+#'   \item{`portf_wts_equal_risk`}{estimates the Equal Risk Contribution
+#'     portfolio weights using [FRAPO::PERC()].
+#'   }
 #' }
 #'
-#' See the documentation for those respective for details.
+#' See the documentation for each portfolio weight estimation function for
+#' details on how they work.
 #'
 #' @param returns An xts object containing returns for two or more assets.
 #' @param n_days_vol Number of days to use in the covariance matrix calculation.
 #'
-#' @return An xts object containing weights for each asset in \code{returns}.
+#' @return An xts object containing weights for each asset in `returns`.
 #'
 #' @author Joshua Ulrich
 #'
@@ -109,43 +107,40 @@ function(returns,
 #' calculate portfolio weights at the end of each month and apply those weights
 #' to the following month.
 #'
-#' These function use \code{n_days} of returns to estimate the asset weights,
-#' and \code{n_days_vol} to calculate the covariance matrix. Functions with a
-#' \code{n_assets} argument will only include up to that number of assets in
+#' These function use `n_days` of returns to estimate the asset weights,
+#' and `n_days_vol` to calculate the covariance matrix. Functions with a
+#' `n_assets` argument will only include up to that number of assets in
 #' the portfolio.
 #'
 #' \describe{
-#'   \item{\code{portf_return_equal_risk}}{uses \code{\link[FRAPO]{PERC}} from the
-#'     \pkg{FRAPO} package to calculate the Equal Risk Contribution portfolio
-#'     return using all assets.
+#'   \item{`portf_return_equal_risk`}{uses [FRAPO::PERC()] to calculate
+#'     the Equal Risk Contribution portfolio return using all assets.
 #'   }
-#'   \item{\code{portf_return_momo}}{calculates the equal weight portfolio of
-#'     the \code{n_assets} with the highest momentum over the past \code{n_days}.
+#'   \item{`portf_return_momo`}{calculates the equal weight portfolio of
+#'     the `n_assets` with the highest momentum over the past `n_days`.
 #'   }
-#'   \item{\code{portf_return_momo_equal_risk}}{calculates the Equal Risk
-#'     Contribution portfolio return using only the \code{n_assets} with the
-#'     highest momentum over the last \code{n_days}.
+#'   \item{`portf_return_momo_equal_risk`}{calculates the Equal Risk
+#'     Contribution portfolio return using only the `n_assets` with the
+#'     highest momentum over the last `n_days`.
 #'   }
-#'   \item{\code{portf_return_momo_efficient}}{uses \code{\link[tseries]{portfolio.optim}}
-#'     from the \pkg{tseries} package to calculate the mean-variance efficient
-#'     portfolio return using the \code{n_assets} with the highest momentum over
-#'     the last \code{n_days}.
+#'   \item{`portf_return_momo_efficient`}{uses [tseries::portfolio.optim()]
+#'     to calculate the mean-variance efficient portfolio return using the
+#'     `n_assets` with the highest momentum over the last `n_days`.
 #'   }
-#'   \item{\code{portf_return_momo_min_var}}{uses \code{\link[FRAPO]{PGMV}} from
-#'     the \pkg{FRAPO} package to calculate the Global Minimum Variance portfolio
-#'     return using the \code{n_assets} with the highest momentum over the last
-#'     \code{n_days}.
+#'   \item{`portf_return_momo_min_var`}{uses [FRAPO::PGMV()] to calculate
+#'     to calculate the Global Minimum Variance portfolio return using the
+#'     `n_assets` with the highest momentum over the last `n_days`.
 #'   }
 #' }
 #'
-#' The \code{momo_type} argument can be one of the following values:
+#' The `momo_type` argument can be one of the following values:
 #' \describe{
-#'   \item{relative}{use the top \code{n_assets} with the highest momentum.
+#'   \item{relative}{use the top `n_assets` with the highest momentum.
 #'   }
-#'   \item{positive}{use the top \code{n_assets} with the highest \emph{positive}
+#'   \item{positive}{use the top `n_assets` with the highest _positive_
 #'     momentum. Assets with negative momentum are excluded.
 #'   }
-#'   \item{above average}{use the top \code{n_assets} with the highest above-average
+#'   \item{above average}{use the top `n_assets` with the highest above-average
 #'     momentum. Assets with below average momentum are excluded.
 #'   }
 #' }
@@ -157,7 +152,7 @@ function(returns,
 #' @param momo_type Type of momentum to use. See Details.
 #'
 #' @return An xts object containing the portfolio return for each day in
-#'     \code{returns}.
+#'     `returns`.
 #'
 #' @author Joshua Ulrich
 #'
