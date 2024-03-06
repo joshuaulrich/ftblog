@@ -74,10 +74,9 @@ function(returns,
         stop("please install the FRAPO package")
     }
     vol_returns <- last(returns, n_days_vol)
-    sigma <- cov(vol_returns)
 
     capture.output({  # this optimization function is chatty
-        min_var_portf <- FRAPO::PGMV(sigma, percentage = FALSE)
+        min_var_portf <- FRAPO::PGMV(vol_returns, percentage = FALSE)
     })
 
     return(FRAPO::Weights(min_var_portf))
