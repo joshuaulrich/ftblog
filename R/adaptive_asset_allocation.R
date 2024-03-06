@@ -59,8 +59,8 @@ function(returns,
     sigma <- cov(vol_returns)
 
     Ra <- as.matrix(returns)
-    min_var_portf <- tseries::portfolio.optim(x = Ra, covmat = sigma)
-    weights <- round(min_var_portf$pw, 7)
+    efficient_portf <- tseries::portfolio.optim(x = Ra, covmat = sigma)
+    weights <- round(efficient_portf$pw, 7)
 
     return(weights)
 }
