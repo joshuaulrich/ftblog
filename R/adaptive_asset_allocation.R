@@ -175,7 +175,7 @@ function(returns,
     weights <- lag(weights)      # use prior month-end weights
     weights <- na.locf(weights)  # fill weights for all days
 
-    Rp <- xts(rowSums(returns * weights), index(returns))
+    Rp <- xts(rowSums(returns * weights), index(returns), weights = weights)
     colnames(Rp) <- "R_eq_risk"
     return(Rp)
 }
@@ -211,7 +211,7 @@ function(returns,
     weights <- lag(weights)      # use prior month-end weights
     weights <- na.locf(weights)  # fill weights for all days
 
-    Rp <- xts(rowSums(returns * weights), index(returns))
+    Rp <- xts(rowSums(returns * weights), index(returns), weights = weights)
     colnames(Rp) <- "R_momo_eq_risk"
     return(Rp)
 }
@@ -244,7 +244,7 @@ function(returns,
     weights <- lag(weights)      # use prior month-end weights
     weights <- na.locf(weights)  # fill weights for all days
 
-    Rp <- xts(rowSums(returns * weights), index(returns))
+    Rp <- xts(rowSums(returns * weights), index(returns), weights = weights)
     colnames(Rp) <- "R_momo"
     return(Rp)
 }
