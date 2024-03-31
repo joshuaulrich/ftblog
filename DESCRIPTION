@@ -1,7 +1,7 @@
 Package: ftblog
 Type: Package
 Title: FOSS Trading Blog
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
   person(given=c("Joshua","M."), family="Ulrich", role=c("cre","aut"), email="josh.m.ulrich@gmail.com")
   )
