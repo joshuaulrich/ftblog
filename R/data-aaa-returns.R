@@ -92,5 +92,35 @@ function(asset_table)
     asset_col <- "US.Real.Estate"
     returns[, asset_col] <- splice_returns(returns[, asset_col], Return.calculate(us_re))
 
+    attr(returns, "symbols") <- c(Cash = "SHV", unlist(assets[1,]))
     returns <- na.omit(returns)["/2023"]
+}
+
+#' Update the 'aaa_returns' data set
+#'
+#' This function takes the data set returned by `data(aaa_returns)` as input,
+#' pulls data from 2024 to present, calculates returns of the new data, and
+#' appends the new returns to the original data.
+#'
+#' @param aaa_returns The xts object returned by `data(aaa_returns)`
+#'
+#' @return The `aaa_returns` object with returns to the most current date.
+#'
+#' @author Joshua Ulrich
+#'
+update_aaa_returns <-
+function(aaa_returns,
+         src = "tiingo")
+{
+    symbols <- attr(aaa_returns, "symbols")
+    from <- end(aaa_returns)
+    data_env <- new.env()
+    quantmod::getSymbols(symbols, env = data_env, from = from, src = src)
+    do_returns <- function(price) {
+        r <- PerformanceAnalytics::Return.calculate(quantmod::Ad(price))
+        setNames(r, sub(".Adjusted", "", names(r), fixed = TRUE))
+    }
+    result <- do.call(merge, lapply(data_env, do_returns))[,symbols]
+    colnames(result) <- make.names(names(symbols))
+    rbind(aaa_returns, result["2024/"])
 }
