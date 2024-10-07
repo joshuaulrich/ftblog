@@ -16,6 +16,7 @@ import(zoo)
 # exports
 export(format_pct)
 export(to_monthly_returns)
+export(portf_summary)
 
 # Adaptive Asset Allocation
 export(portf_wts_efficient)
