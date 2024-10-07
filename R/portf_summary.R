@@ -33,8 +33,9 @@ portf_summary <-
 function(returns)
 {
     stats <- PerformanceAnalytics::table.AnnualizedReturns(returns)
+    max_dd <- PerformanceAnalytics::maxDrawdown
     stats <- rbind(stats,
-                   "Worst Drawdown" = -maxDrawdown(returns))
+                   "Worst Drawdown" = -max_dd(returns))
     stats <- round(stats, 3)
 
     return(stats)
