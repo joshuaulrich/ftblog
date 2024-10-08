@@ -122,5 +122,6 @@ function(aaa_returns,
     }
     result <- do.call(merge, lapply(data_env, do_returns))[,symbols]
     colnames(result) <- make.names(names(symbols))
-    rbind(aaa_returns, result["2024/"])
+    result <- na.omit(result)
+    rbind(aaa_returns, result)
 }
